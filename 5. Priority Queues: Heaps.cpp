@@ -1,106 +1,116 @@
-/*
- * Author : Hossam Asaad
- */
- 
 #include <bits/stdc++.h>
-#include <algorithm>
 
 using namespace std;
 
-int  parent    (int i);
-int  leftChild (int i);
-int  rightChild(int i);
-void siftUp    (int i);
-void siftDown  (int i);
-void Insert    (int p);
-int extractMax();
-void Remove(int i);
-void changePriority(int i,int p);
+const int max_size = 10;                             // maximum size of the heap
+int H[max_size];                                     // The Heap
+int N = 5;                                           // current size of heap
 
-int size = 0;
-const int maxSize = 13;
-int H[maxSize];
-
-int main() {
-    H[0] = 10000 ; // not in heap
-                            H[1] = 45;
-                H[2] = 35;              H[3] = 20;
-         H[4] = 25;    H[5] = 15;     H[6]=12;   H[7] = 15;
-
-    size = 7;
-    cout << H[parent(5)] << endl;
-    cout << H[leftChild(2)] << endl;
-    cout << H[rightChild(2)] << endl;
-    Insert(50);
-    cout << H[1] << endl ;
-    changePriority(1,80);
-    cout << H[1] << endl ;
-    cout << extractMax() << endl;
-    cout << H[1] << endl;
+int parent(int i)                                    // return the parent of node i
+{
+    return i/2;
 }
 
-int parent    (int i){
-    return i/2 ;
-}
-
-int leftChild (int i){
+int left_child(int i)                                // return left child of node i
+{
     return 2*i;
 }
 
-int rightChild(int i){
-    return 2*i+1;
+int right_child(int i)                               // return right child of node i
+{
+    return 2 * i + 1;
 }
 
-void siftUp   (int i){
-    while(i>0 && H[parent(i)]<H[i]){
-        swap(H[i],H[parent(i)]);
+void sift_up(int i)                                  // sift up node i to the right place
+{
+    while( i>0 && H[ parent(i) ] < H[i] ){
+        swap(H[ parent(i) ], H[i]);
         i = parent(i);
     }
 }
 
-void siftDown (int i){
-    int maxIdx = i;
+void sift_down(int i,int N)                          // sift down node i to the right place
+{
+    int l = left_child(i);
+    int r = right_child(i);
 
-    int l = leftChild(i);
-    if(l<=size && H[l]>H[maxIdx]){
-        maxIdx = l;
-    }
+    int largest = i;
 
-    int r = rightChild(i);
-    if(r<=size && H[r]>H[maxIdx]){
-        maxIdx = r;
-    }
+    if( l <= N && H[l] > H[i])
+        largest = l;
 
-    if(i!=maxIdx){
-        swap(H[i] , H[maxIdx]);
-        siftDown(maxIdx);
+    if( r <= N && H[r] > H[largest])
+        largest = r;
+
+    if(i!=largest){
+        swap(H[i],H[largest]);
+        sift_down(i,N);
     }
 }
 
-void Insert   (int p){
-    if(size == maxSize) return;
-    size++;
-    H[size] = p;
-    siftUp(size);
+void build_heap()                                    // build heap after inserting data
+{
+    for(int i=N/2;i>=1;i--)
+    {
+        sift_down(i,N);
+    }
 }
 
-int extractMax(){
+void Insert(int p)                                   // To insert point  tot the heap
+{
+    if(N == max_size) return;
+    N++;
+    H[N] = p;
+    sift_down(N,N);
+}
+
+int extract_max()                                    // extract max element (root) in the heap
+{
     int result = H[1];
-    H[1] = H[size];
-    size--;
-    siftDown(1);
+    H[1] = H[N];
+    N--;
+    sift_down(1,N);
     return result;
 }
 
-void Remove(int i){
+void Remove(int i)                                   // Remove an element and index i
+{
     H[i] = 9999999;
-    siftUp(i);
-    extractMax();
+    sift_up(i);
+    extract_max();
 }
 
-void changePriority(int i,int p){
-    int oldP = H[i];
+void change_priority(int i, int p)
+{
+    int old_p = H[i];
     H[i] = p;
-    if(p>oldP) siftUp(i);
-    else siftDown(i);
+
+    if(old_p > p) sift_down(i,N);
+    else sift_up(i);
+}
+
+void heap_sort()
+{
+    build_heap();
+    int heap_size = N;
+    for(int i = N; i>=2 ; i-- )
+    {
+        swap(H[ 1 ], H[ i ]);
+        heap_size--;
+        sift_down(1,heap_size);
+    }
+}
+
+int main() {
+    H[0] = 99999;
+    H[1] = 5;
+    H[2] = 4;
+    H[3] = 10;
+    H[4] = 12;
+    H[5] = 1;
+
+    heap_sort();
+    for(int i=1;i<=N;i++)
+        cout << H[i] << endl;
+    return 0;
 }
